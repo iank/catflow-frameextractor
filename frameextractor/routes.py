@@ -7,6 +7,7 @@ from .utils.db import vector_db_connect
 from .utils.embedding import ImageFeatureExtractor
 from .utils.image_processing import extract_frames, get_predictions, vector_db_add_novel
 from flask_executor import Executor
+import pkg_resources
 import tempfile
 import os
 import uuid
@@ -16,6 +17,16 @@ def register_routes(app):
     executor = Executor(app)
     model = load_model(app.config['MODEL_NAME'])
     feature_extractor = ImageFeatureExtractor()
+
+    @app.route('/status')
+    def status():
+        status_info = {
+            "status": "OK",
+            "service_name": "frameextractor",
+            "version": pkg_resources.require("frameextractor")[0].version
+        }
+
+        return jsonify(status_info), 200
 
     @app.route('/sources', methods=['POST'])
     def sources():
