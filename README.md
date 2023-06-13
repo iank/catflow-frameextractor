@@ -1,4 +1,4 @@
-# noether-frameextractor
+# catflow-frameextractor
 Video preannotation and filter for an object recognition data pipeline
 
 # Build
@@ -17,4 +17,4 @@ pip install dist/frameextractor-0.4.0-py3-none-any.whl -f https://download.pytor
 docker build -t iank1/frameextractor:v0.4.0 .
 ```
 
-See [noether-docker](https://github.com/iank/noether-docker) for `docker-compose.yml`
+See [catflow-docker](https://github.com/iank/catflow-docker) for `docker-compose.yml`
