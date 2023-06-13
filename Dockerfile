@@ -17,8 +17,8 @@ ADD requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
 
 # Install any needed packages specified in requirements.txt
-ADD dist/frameextractor-0.4.0-py3-none-any.whl /app
-RUN pip install --no-cache-dir frameextractor-0.4.0-py3-none-any.whl
+ADD dist/frameextractor-0.4.1-py3-none-any.whl /app
+RUN pip install --no-cache-dir frameextractor-0.4.1-py3-none-any.whl
 
 # We'll add these with docker-compose for now
 #ADD frameextractor.ini /app

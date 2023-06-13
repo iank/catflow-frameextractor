@@ -17,6 +17,19 @@ def register_routes(app):
     model = load_model(app.config['MODEL_NAME'])
     feature_extractor = ImageFeatureExtractor()
 
+    @app.route('/sources', methods=['POST'])
+    def sources():
+        secret_token = app.config['SECRET_TOKEN']
+        
+        if 'Authorization' not in request.headers or request.headers['Authorization'] != secret_token:
+            abort(401)  # Unauthorized
+
+        uuids = request.json.get('uuids', [])
+        if not isinstance(uuids, list) or not all(isinstance(i, str) for i in uuids):
+            return jsonify({"error": "Invalid input. uuids should be a list of strings"}), 400
+        sources = get_sources(uuids, app.config['PG_CONFIG'])
+        return jsonify(sources)
+    
     @app.route('/process_video', methods=['POST'])
     def process_video():
         secret_token = app.config['SECRET_TOKEN']
@@ -120,3 +133,12 @@ def process_video_file(model, feature_extractor, config, temp_dir, temp_file):
     db.close()
 
     return '', 200  # OK
+
+def get_sources(uuids, db_config):
+    conn = vector_db_connect(db_config)
+    cur = conn.cursor()
+    query = "SELECT uuid, source FROM images WHERE uuid IN %s"
+    cur.execute(query, (tuple(uuids),))
+    rows = cur.fetchall()
+    conn.close()
+    return rows
