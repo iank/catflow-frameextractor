@@ -1,5 +1,5 @@
 # flaskapp/routes.py
-from flask import request, abort, jsonify, current_app
+from flask import request, abort, jsonify, current_app, Response
 from .utils.s3_connector import S3Connector
 from .utils.label_studio import LabelStudioAPI
 from .utils.model import load_model
@@ -10,6 +10,7 @@ from flask_executor import Executor
 import pkg_resources
 import tempfile
 import os
+import time
 import uuid
 import cv2
 
@@ -17,6 +18,7 @@ def register_routes(app):
     executor = Executor(app)
     model = load_model(app.config['MODEL_NAME'])
     feature_extractor = ImageFeatureExtractor()
+
 
     @app.route('/status')
     def status():
@@ -27,6 +29,7 @@ def register_routes(app):
         }
 
         return jsonify(status_info), 200
+
 
     @app.route('/sources', methods=['POST'])
     def sources():
@@ -40,6 +43,47 @@ def register_routes(app):
             return jsonify({"error": "Invalid input. uuids should be a list of strings"}), 400
         sources = get_sources(uuids, app.config['PG_CONFIG'])
         return jsonify(sources)
+
+
+    @app.route('/export', methods=['GET'])
+    def export():
+        api = LabelStudioAPI(app.config['LABELSTUDIO_BASE_URL'], app.config['LABELSTUDIO_AUTH_TOKEN'])
+
+        try:
+            # Create a snapshot on the server
+            export_id, snapshot_name = api.create_snapshot(app.config['PROJECT_ID'])
+
+            # Check the status until the snapshot is created
+            completed = False
+            while not completed:
+                completed = api.check_export_status(app.config['PROJECT_ID'], export_id)
+                time.sleep(1)
+
+            # Convert the created snapshot to YOLO
+            api.convert_snapshot(app.config['PROJECT_ID'], export_id, "YOLO")
+
+            # Check the status until the conversion is complete
+            completed = False
+            while not completed:
+                completed = api.check_conversion_status(app.config['PROJECT_ID'], export_id, "YOLO")
+                time.sleep(1)
+
+            # Download the archive
+            resp = api.download_snapshot(app.config['PROJECT_ID'], export_id, snapshot_name)
+
+            def generate():
+                for chunk in resp.iter_content(chunk_size=1024):
+                    yield chunk
+
+            response = Response(generate(), content_type=resp.headers['content-type'])
+            response.headers["Content-Disposition"] = f"attachment; filename={snapshot_name}.zip"
+
+            return response
+
+        except Exception as e:
+            app.logger.error(f"/export: {e}")
+            abort(500)
+
     
     @app.route('/process_video', methods=['POST'])
     def process_video():
@@ -71,6 +115,7 @@ def register_routes(app):
             return jsonify({"message": f"Error processing video: {e}"}), 500
 
         return jsonify({"message": "Processing started"}), 202
+
 
 def process_video_file(model, feature_extractor, config, temp_dir, temp_file):
     current_app.logger.info(f'Processing video file {temp_file}')
@@ -144,6 +189,7 @@ def process_video_file(model, feature_extractor, config, temp_dir, temp_file):
     db.close()
 
     return '', 200  # OK
+
 
 def get_sources(uuids, db_config):
     conn = vector_db_connect(db_config)
