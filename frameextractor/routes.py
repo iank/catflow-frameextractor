@@ -52,6 +52,9 @@ def register_routes(app):
         try:
             # Create a snapshot on the server
             export_id, snapshot_name = api.create_snapshot(app.config['PROJECT_ID'])
+            if export_id is None:
+                app.logger.error(f"/export: Failed to create snapshot")
+                abort(500)
 
             # Check the status until the snapshot is created
             completed = False
@@ -69,7 +72,7 @@ def register_routes(app):
                 time.sleep(1)
 
             # Download the archive
-            resp = api.download_snapshot(app.config['PROJECT_ID'], export_id, snapshot_name)
+            resp = api.download_snapshot(app.config['PROJECT_ID'], export_id)
 
             def generate():
                 for chunk in resp.iter_content(chunk_size=1024):
@@ -80,9 +83,11 @@ def register_routes(app):
 
             return response
 
-        except Exception as e:
-            app.logger.error(f"/export: {e}")
+        except requests.exception.HTTPError as e:
+            app.logger.error(f"/export: Label Studio API call failed: {e.response.text}")
             abort(500)
+        except ValueError:
+            app.logger.error(f"/export: Checking export or conversion status failed")
 
     
     @app.route('/process_video', methods=['POST'])
@@ -178,8 +183,8 @@ def process_video_file(model, feature_extractor, config, temp_dir, temp_file):
                 else:
                     current_app.logger.info(f'Created task {frame_uuid}')
                     tasks_created = tasks_created + 1
-            except Exception as e:
-                current_app.logger.error(f'Failed to upload task to Label Studio: {e}')
+            except requests.exceptions.HTTPError as e:
+                current_app.logger.error(f'Failed to upload task to Label Studio: {e.response.text}')
 
     # Log
     current_app.logger.info(f"Tasks created: {tasks_created}/{len(frames)}")
