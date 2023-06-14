@@ -108,11 +108,11 @@ def register_routes(app):
         future = executor.submit(process_video_file, model, feature_extractor, app.config, temp_dir, temp_file)
 
         # Temporary debug
-        try:
-            future.result()
-        except Exception as e:
-            current_app.logger.error(f"Error processing video: {e}")
-            return jsonify({"message": f"Error processing video: {e}"}), 500
+#        try:
+#            future.result()
+#        except Exception as e:
+#            current_app.logger.error(f"Error processing video: {e}")
+#            return jsonify({"message": f"Error processing video: {e}"}), 500
 
         return jsonify({"message": "Processing started"}), 202
 
