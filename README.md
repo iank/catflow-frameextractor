@@ -3,7 +3,12 @@ Video preannotation and filter for an object recognition data pipeline
 
 # Set up
 
-In your virtualenv:
+# Setup
+
+* Install [pre-commit](https://pre-commit.com/#install) in your virtualenv. Run
+`pre-commit install` after cloning this repository.
+
+* Install dependencies:
 
 ```
 pip install torch==2.0.1+cpu torchvision==0.15.2+cpu -f https://download.pytorch.org/whl/torch_stable.html
