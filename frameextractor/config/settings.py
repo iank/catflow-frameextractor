@@ -13,6 +13,11 @@ class Config:
         self.MODEL_NAME = config.get("FrameExtractor", "MODEL_NAME")
         self.THRESHOLD = config.getfloat("FrameExtractor", "THRESHOLD")
 
+        try:
+            self.DEBUG_EXECUTOR = config.get("FrameExtractor", "DEBUG")
+        except configparser.NoOptionError:
+            pass
+
         # S3 configuration
         self.S3_CONFIG = {
             "bucket_name": config.get("S3", "BUCKET_NAME"),

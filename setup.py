@@ -1,16 +1,13 @@
 from setuptools import setup, find_packages
 
-with open('requirements.txt') as f:
+with open("requirements.txt") as f:
     required = f.read().splitlines()
 
 setup(
-    name='frameextractor',
-    version='0.5.1',
+    name="frameextractor",
+    version="0.5.1",
     packages=find_packages(),
     install_requires=required,
-
     # For torch+cpu
-    dependency_links=[
-        'https://download.pytorch.org/whl/torch_stable.html'
-    ],
+    dependency_links=["https://download.pytorch.org/whl/torch_stable.html"],
 )

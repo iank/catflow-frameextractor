@@ -13,6 +13,7 @@ import os
 import time
 import uuid
 import cv2
+import requests
 
 
 def register_routes(app):
@@ -59,7 +60,7 @@ def register_routes(app):
             # Create a snapshot on the server
             export_id, snapshot_name = api.create_snapshot(app.config["PROJECT_ID"])
             if export_id is None:
-                app.logger.error(f"/export: Failed to create snapshot")
+                app.logger.error("/export: Failed to create snapshot")
                 abort(500)
 
             # Check the status until the snapshot is created
@@ -99,7 +100,7 @@ def register_routes(app):
             )
             abort(500)
         except ValueError:
-            app.logger.error(f"/export: Checking export or conversion status failed")
+            app.logger.error("/export: Checking export or conversion status failed")
 
     @app.route("/process_video", methods=["POST"])
     def process_video():
@@ -133,12 +134,12 @@ def register_routes(app):
             temp_file,
         )
 
-        # Temporary debug
-        #        try:
-        #            future.result()
-        #        except Exception as e:
-        #            current_app.logger.error(f"Error processing video: {e}")
-        #            return jsonify({"message": f"Error processing video: {e}"}), 500
+        if app.config["DEBUG_EXECUTOR"]:
+            try:
+                future.result()
+            except Exception as e:
+                current_app.logger.error(f"Error processing video: {e}")
+                return jsonify({"message": f"Error processing video: {e}"}), 500
 
         return jsonify({"message": "Processing started"}), 202
 
@@ -176,7 +177,7 @@ def process_video_file(model, feature_extractor, config, temp_dir, temp_file):
 
             cv2.imwrite(temp_file_path, frame)
 
-            # Check that the min distance to a frame already in our vector DB is > threshold
+            # Check the min distance to a frame already in our vector DB
             if not vector_db_add_novel(
                 db,
                 feature_extractor,
@@ -212,7 +213,7 @@ def process_video_file(model, feature_extractor, config, temp_dir, temp_file):
             try:
                 response = labelstudio.import_task(config["PROJECT_ID"], task)
                 if response is None:
-                    current_app.logger.error(f"Failed to upload task to Label Studio")
+                    current_app.logger.error("Failed to upload task to Label Studio")
                 else:
                     current_app.logger.info(f"Created task {frame_uuid}")
                     tasks_created = tasks_created + 1

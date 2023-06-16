@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import uuid
 from PIL import Image
 from flask import current_app
 from pgvector.psycopg2 import register_vector
@@ -91,7 +90,10 @@ def vector_db_add_novel(
 
     embedding = np.array(feature_extractor.get_vector(file_path).tolist())
 
-    query = "SELECT uuid, cosine_distance(embedding, %s) as distance FROM images ORDER BY distance LIMIT 1"
+    query = (
+        "SELECT uuid, cosine_distance(embedding, %s) as distance"
+        " FROM images ORDER BY distance LIMIT 1"
+    )
     cur = db.cursor()
     cur.execute(query, (embedding,))
     results = cur.fetchall()

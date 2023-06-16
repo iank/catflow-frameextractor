@@ -107,7 +107,7 @@ class LabelStudioAPI:
                             return True
                         elif format["status"] == "failed":
                             raise ValueError(
-                                f"Conversion failed for format {format_type} with export ID: {export_id}"
+                                f"Conversion failed for export ID: {export_id}"
                             )
         raise ValueError(
             f"No export found with ID: {export_id} or format: {format_type}"
@@ -139,7 +139,10 @@ class LabelStudioAPI:
         Returns:
             requests.models.Response: The HTTP response object.
         """
-        url = f"{self.base_url}/api/projects/{project_id}/exports/{export_id}/download?exportType=YOLO"
+        url = (
+            f"{self.base_url}/api/projects/{project_id}/exports/{export_id}"
+            "/download?exportType=YOLO"
+        )
         req = requests.get(url, headers=self.headers, stream=True)
 
         return req
