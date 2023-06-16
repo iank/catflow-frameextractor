@@ -6,6 +6,8 @@ on:
       - 'main'
     tags:
       - 'v*'
+    schedule:
+      - cron: '32 8 2 * *' # Monthly builds
 
 jobs:
   build:
@@ -21,6 +23,10 @@ jobs:
       uses: docker/metadata-action@v4
       with:
         images: iank1/frameextractor
+        tags: |
+          type=ref,event=branch
+          type=ref,event=tag
+          type=schedule,pattern=nightly
 
     - name: Log in to Docker Hub
       uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
