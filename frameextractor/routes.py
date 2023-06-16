@@ -3,7 +3,7 @@ from flask import request, abort, jsonify, current_app, Response
 from .utils.s3_connector import S3Connector
 from .utils.label_studio import LabelStudioAPI
 from .utils.model import load_model
-from .utils.db import vector_db_connect
+from .utils.db import vector_db_connect, check_db
 from .utils.embedding import ImageFeatureExtractor
 from .utils.image_processing import extract_frames, get_predictions, vector_db_add_novel
 from flask_executor import Executor
@@ -24,12 +24,18 @@ def register_routes(app):
     @app.route("/status")
     def status():
         status_info = {
-            "status": "OK",
             "service_name": "frameextractor",
             "version": pkg_resources.require("frameextractor")[0].version,
         }
 
-        return jsonify(status_info), 200
+        if check_db(app.config["PG_CONFIG"]):
+            status_info["database"] = "Online"
+            http_code = 200
+        else:
+            status_info["database"] = "Offline"
+            http_code = 500
+
+        return jsonify(status_info), http_code
 
     @app.route("/sources", methods=["POST"])
     def sources():
