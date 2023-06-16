@@ -16,7 +16,7 @@ class Config:
         try:
             self.DEBUG_EXECUTOR = config.get("FrameExtractor", "DEBUG")
         except configparser.NoOptionError:
-            pass
+            self.DEBUG_EXECUTOR = 0
 
         # S3 configuration
         self.S3_CONFIG = {
