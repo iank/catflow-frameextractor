@@ -1,20 +1,38 @@
 # catflow-frameextractor
 Video preannotation and filter for an object recognition data pipeline
 
+# Set up
+
+In your virtualenv:
+
+```
+pip install torch==2.0.1+cpu torchvision==0.15.2+cpu -f https://download.pytorch.org/whl/torch_stable.html
+
+pip install -r requirements.txt
+```
+
+# Develop
+
+```
+pip install --editable .
+```
+
 # Build
+
 ```
 python setup.py sdist bdist_wheel
 ```
 
 # Install
+
 ```
-pip install dist/frameextractor-0.5.1-py3-none-any.whl -f https://download.pytorch.org/whl/torch_stable.html
+pip install dist/frameextractor-*-py3-none-any.whl
 ```
 
 # Docker
 
 ```
-docker build -t iank1/frameextractor:v0.5.1 .
+docker build -t iank1/frameextractor:latest .
 ```
 
 See [catflow-docker](https://github.com/iank/catflow-docker) for `docker-compose.yml`

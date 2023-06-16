@@ -50,3 +50,4 @@ ultralytics==8.0.116
 urllib3==1.26.16
 waitress==2.1.2
 Werkzeug==2.3.6
+wheel==0.40.0
