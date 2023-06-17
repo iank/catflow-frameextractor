@@ -20,3 +20,11 @@ and the frame count can be verified with:
 ```
 ffmpeg -i car.mp4 -map 0:v:0 -c copy -f null -
 ```
+
+## `car.png`
+
+Aforementioned Wikipedia image
+
+## `yolov5n.pt`
+
+Pretrained YOLOv5 nano model
