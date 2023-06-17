@@ -45,9 +45,17 @@ jobs:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
 
+    - name: Install OpenCV deps
+      run: |
+        sudo apt install ffmpeg libsm6 libxext6
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
+
+    - name: Run tests
+      run: |
+        pytest
 
     - name: Build wheel
       run: |
