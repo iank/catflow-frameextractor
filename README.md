@@ -1,5 +1,6 @@
 # catflow-frameextractor
-Video preannotation and filter for an object recognition data pipeline
+
+Video preannotation and filter for an object recognition data pipeline. This package's purpose has changed somewhat since I created it; it should really be called `catflow-dataingestion` or something like that.
 
 # Set up
 
