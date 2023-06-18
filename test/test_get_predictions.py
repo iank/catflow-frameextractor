@@ -37,10 +37,10 @@ def test_get_predictions_structure(datafiles):
 
     pv = prediction["value"]
     assert pv["rotation"] == 0
-    assert pv["x"] >= 0 and pv["x"] <= 100
-    assert pv["y"] >= 0 and pv["y"] <= 100
-    assert pv["width"] >= 0 and pv["width"] <= prediction["original_width"]
-    assert pv["height"] >= 0 and pv["height"] <= prediction["original_height"]
+    assert pv["x"] >= 3.20 and pv["x"] <= 3.21
+    assert pv["y"] >= 25.60 and pv["y"] <= 25.64
+    assert pv["width"] >= 96.79 and pv["width"] <= 96.80
+    assert pv["height"] >= 63.93 and pv["height"] <= 63.94
     assert pv["rectanglelabels"] == ["car"]
 
 
