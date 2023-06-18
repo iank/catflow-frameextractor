@@ -28,3 +28,7 @@ Aforementioned Wikipedia image
 ## `yolov5n.pt`
 
 Pretrained YOLOv5 nano model
+
+## `cat_and_dog.png`
+
+Resized version of a photograph by Nadia Vasileva, downloaded from pexels.com
