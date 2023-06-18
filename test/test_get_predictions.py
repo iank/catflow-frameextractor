@@ -1,5 +1,5 @@
 from frameextractor.utils.image_processing import get_predictions
-from frameextractor.utils.model import load_model
+from frameextractor.utils.model import Model
 
 from pathlib import Path
 
@@ -18,9 +18,9 @@ def test_get_predictions_structure(datafiles):
     assert img_path.is_file()
 
     model_name = str(datafiles / "yolov5n")  # load_model adds the .pt
-    model = load_model(model_name)
+    model = Model(model_name, 0.2)
 
-    predictions = get_predictions(model, model_name, str(img_path), 0.2)
+    predictions = get_predictions(model, str(img_path))
     assert predictions["model_version"] == model_name
     assert "score" in predictions
     assert len(predictions["result"]) == 1
@@ -54,9 +54,9 @@ def test_get_predictions_multiple(datafiles):
     assert img_path.is_file()
 
     model_name = str(datafiles / "yolov5n")  # load_model adds the .pt
-    model = load_model(model_name)
+    model = Model(model_name, 0.2)
 
-    predictions = get_predictions(model, model_name, str(img_path), 0.2)
+    predictions = get_predictions(model, str(img_path))
     assert len(predictions["result"]) == 2
 
     labels = [x["value"]["rectanglelabels"][0] for x in predictions["result"]]
@@ -74,9 +74,9 @@ def test_get_predictions_threshold(datafiles):
     assert img_path.is_file()
 
     model_name = str(datafiles / "yolov5n")  # load_model adds the .pt
-    model = load_model(model_name)
+    model = Model(model_name, 0.44)
 
-    predictions = get_predictions(model, model_name, str(img_path), 0.44)
+    predictions = get_predictions(model, str(img_path))
     assert len(predictions["result"]) == 1
 
     assert predictions["result"][0]["value"]["rectanglelabels"] == ["dog"]

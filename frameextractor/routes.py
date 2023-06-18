@@ -2,7 +2,7 @@
 from flask import request, abort, jsonify, current_app, Response
 from .utils.s3_connector import S3Connector
 from .utils.label_studio import LabelStudioAPI
-from .utils.model import load_model
+from .utils.model import Model
 from .utils.db import vector_db_connect, check_db
 from .utils.embedding import ImageFeatureExtractor
 from .utils.image_processing import extract_frames, get_predictions, vector_db_add_novel
@@ -18,7 +18,7 @@ import requests
 
 def register_routes(app):
     executor = Executor(app)
-    model = load_model(app.config["MODEL_NAME"])
+    model = Model(app.config["MODEL_NAME"], app.config["THRESHOLD"])
     feature_extractor = ImageFeatureExtractor()
 
     @app.route("/status")
@@ -195,9 +195,7 @@ def process_video_file(model, feature_extractor, config, temp_dir, temp_file):
                 continue
 
             # Get predictions
-            predictions = get_predictions(
-                model, config["MODEL_NAME"], temp_file_path, config["THRESHOLD"]
-            )
+            predictions = get_predictions(model, temp_file_path)
 
             # Upload to S3
             s3_uri = (

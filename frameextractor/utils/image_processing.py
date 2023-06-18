@@ -5,7 +5,25 @@ from flask import current_app
 from pgvector.psycopg2 import register_vector
 
 
-def get_predictions(model, model_name, image_path, threshold):
+def yolo_to_ls(x_px, y_px, width_px, height_px, original_width, original_height):
+    """Convert YOLO bounding box to Label Studio format
+
+    (x/y centered, units pixels) to (x/y top left, units proportion of original image)
+    """
+    # Scale
+    x = x_px * 100.0 / original_width
+    y = y_px * 100.0 / original_height
+    width = width_px * 100.0 / original_width
+    height = height_px * 100.0 / original_height
+
+    # Convert (x, y) from center of bounding box to top left corner
+    x = x - width / 2
+    y = y - height / 2
+
+    return x, y, width, height
+
+
+def get_predictions(model, image_path):
     # Open the image file
     pil_image = Image.open(image_path)
 
@@ -13,33 +31,22 @@ def get_predictions(model, model_name, image_path, threshold):
     original_width, original_height = pil_image.size
 
     # Perform inference
-    results = model(pil_image)
+    results = model.predict(pil_image)
 
-    # Get bounding boxes and labels
-    boxes = results.xywh[0]
-    labels = results.xywh[0][:, -1].int()
-
-    predictions = {"model_version": model_name, "score": 0.5, "result": []}
+    predictions = {"model_version": model.model_name, "score": 0.5, "result": []}
 
     # Transform result into required format
-    i = 0
-    for box, label in zip(boxes, labels):
-        x, y, width, height, confidence, class_id = box
-        if confidence < threshold:
+    for idx, pred in enumerate(results):
+        if pred.confidence < model.threshold:
             continue
 
-        x = x * 100.0 / original_width
-        y = y * 100.0 / original_height
-        width = width * 100.0 / original_width
-        height = height * 100.0 / original_height
-
-        # Convert (x, y) from center of bounding box to top left corner
-        x = x - width / 2
-        y = y - height / 2
+        x, y, width, height = yolo_to_ls(
+            pred.x, pred.y, pred.width, pred.height, original_width, original_height
+        )
 
         predictions["result"].append(
             {
-                "id": f"result{i+1}",
+                "id": f"result{idx+1}",
                 "type": "rectanglelabels",
                 "from_name": "label",
                 "to_name": "image",
@@ -48,15 +55,14 @@ def get_predictions(model, model_name, image_path, threshold):
                 "image_rotation": 0,
                 "value": {
                     "rotation": 0,
-                    "x": x.item(),
-                    "y": y.item(),
-                    "width": width.item(),
-                    "height": height.item(),
-                    "rectanglelabels": [results.names[label.item()]],
+                    "x": x,
+                    "y": y,
+                    "width": width,
+                    "height": height,
+                    "rectanglelabels": [pred.label],
                 },
             }
         )
-        i = i + 1
 
     return predictions
 
