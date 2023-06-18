@@ -5,7 +5,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="frameextractor",
-    version="0.5.4-dev",
+    version="0.5.4",
     packages=find_packages(),
     install_requires=required,
     # For torch+cpu
