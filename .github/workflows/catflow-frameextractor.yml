@@ -12,7 +12,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Check Out Repo
@@ -52,7 +52,7 @@ jobs:
 
     - name: Install OpenCV deps
       run: |
-        sudo apt install ffmpeg libsm6 libxext6
+        sudo apt update && sudo apt install -y ffmpeg libsm6 libxext6
 
     - name: Install dependencies
       run: |
